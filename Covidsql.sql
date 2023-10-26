@@ -1,24 +1,24 @@
---1. covid death percentage in Georgia by date
+--covid death percentage in Georgia by date
 
 select location, 
        date, 
-	   total_cases, 
-	   total_deaths, 
+       total_cases, 
+       total_deaths, 
        round((CONVERT(float, total_deaths) / nullif(CONVERT(float, total_cases),0))*100,2) as Deathpercentage
 from coviddeaths
 where location='georgia'
 order by 1,2;
 
 
---2. covid infected percentage in Georgia by date
+--covid infected percentage in Georgia by date
 
 with cte_perc_georgia as(
 	select location, 
-           date, 
+               date, 
 	       total_cases, 
 	       population, 
-           round((CONVERT(float, total_cases) / nullif(CONVERT(float, population),0))*100,2) as percentage
-    from coviddeaths
+               round((CONVERT(float, total_cases) / nullif(CONVERT(float, population),0))*100,2) as percentage
+        from coviddeaths
 )
 
 select *
@@ -27,13 +27,13 @@ where location = 'Georgia'
 order by 1,2
 
 
---3. 10 highest infected percentage per population by country
+--10 highest infected percentage per population by country
 
 with cte_percentage as(
 	select location, 
 	       sum(new_cases) as total_cases, 
 	       population, 
-           max(round((CONVERT(float, total_cases) / nullif(CONVERT(float, population),0))*100,2)) as percentage
+               max(round((CONVERT(float, total_cases) / nullif(CONVERT(float, population),0))*100,2)) as percentage
 from coviddeaths
 group by location, population
 )
@@ -43,7 +43,7 @@ from cte_percentage
 order by percentage desc
 
 
---4. 10 highest death percentage per population by country
+--10 highest death percentage per population by country
 
 WITH cte_Deathpercentage AS (
     SELECT location,
@@ -54,16 +54,13 @@ WITH cte_Deathpercentage AS (
     WHERE continent IS NOT NULL
     GROUP BY location, population
 )
-
+	
 SELECT TOP 10 *
 FROM cte_Deathpercentage
 ORDER BY Deathpercentage DESC
 
-
-
---5. deaths by continent
-
-
+	
+--deaths by continent
 
 select location, 
        max(cast(total_deaths as int)) as total_deaths
@@ -78,7 +75,7 @@ order by Total_deaths desc
 
 select date, 
        sum(new_cases) as total_cases, 
-	   sum(new_deaths) as total_deaths, 
+       sum(new_deaths) as total_deaths, 
        (round((CONVERT(float, sum(new_deaths)) / nullif(CONVERT(float, sum(new_cases)),0))*100,2)) as death_percentage
 from coviddeaths
 where continent is not null
@@ -86,7 +83,7 @@ group by date
 order by date
 
 
---7 total deaths and cases
+--total deaths and cases
 
 select sum(new_cases) as total_cases, 
        sum(new_deaths) as total_deaths, 
@@ -99,9 +96,9 @@ where continent is not null
 
 select d.continent, 
        d.location, 
-	   d.date, 
-	   d.population, 
-	   v.new_vaccinations ,
+       d.date, 
+       d.population, 
+       v.new_vaccinations ,
        sum(convert(int, v.new_vaccinations)) over (partition by d.location order by d.location, d.date) as rollingvaccinated
 from coviddeaths d join covidvactinations v
 on d.location=v.location and
